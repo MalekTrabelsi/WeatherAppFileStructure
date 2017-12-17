@@ -27,7 +27,9 @@ import com.trabelsi.malek.weatherappfilestructure.Model.OpenWeatherMap;
 
 import java.lang.reflect.Type;
 
+// We implement LocationListener to get the current position of our device
 public class MainActivity extends AppCompatActivity implements LocationListener {
+    private String TAG = "MainActivity";
 
     TextView txtCity, txtLastUpdate, txtDescription, txtHumidity, txtTime, txtCelsius;
     ImageView imageView;
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG,"OnCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -54,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = locationManager.getBestProvider(new Criteria(), false);
 
+        // Add runtime permission request for our app
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{
                     Manifest.permission.INTERNET,
@@ -66,13 +70,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
 
         Location location = locationManager.getLastKnownLocation(provider);
-        if (location == null)
+        if (location == null) {
             Log.e("TAG", "No Location");
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        Log.d(TAG,"onPause");
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{
                     Manifest.permission.INTERNET,
@@ -89,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d(TAG,"onResume");
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{
                     Manifest.permission.INTERNET,
@@ -100,10 +107,17 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             }, MY_PERMISSION);
         }
         locationManager.requestLocationUpdates(provider, 400, 1, this);
+
+        Location location = locationManager.getLastKnownLocation(provider);
+        if (location == null){
+            Log.e("TAG", "No Location");
+        }
+        new GetWeather().execute(Common.apiRequest(String.valueOf(lat), String.valueOf(lng)));
     }
 
     @Override
     public void onLocationChanged(Location location) {
+        Log.d(TAG,"onLocationChanged");
         lat = location.getLatitude();
         lng = location.getLongitude();
     }
@@ -123,19 +137,21 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     }
 
+    // Create inner class extend AsyncTask
     private class GetWeather extends AsyncTask<String, Void, String>{
-        ProgressDialog pd = new ProgressDialog(MainActivity.this);
+        //ProgressDialog pd = new ProgressDialog(MainActivity.this);
 
 
-        @Override
+        /**@Override
         protected void onPreExecute() {
             super.onPreExecute();
             pd.setTitle("Please Wait ...");
             pd.show();
-        }
+        }**/
 
         @Override
         protected String doInBackground(String... strings) {
+            Log.d(TAG,"doInBackground");
             String stream = null;
             String urlString = strings[0];
 
@@ -148,22 +164,27 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             if (s.contains("Error: Not found city")) {
-                pd.dismiss();
+                //pd.dismiss();
+                Log.d(TAG,"Bug on Postexecute");
                 return;
             }
 
+            Log.d(TAG, "PostExecute works");
             Gson gson = new Gson();
             Type mType = new TypeToken<OpenWeatherMap>(){}.getType();
             openWeatherMap = gson.fromJson(s,mType);
-            pd.dismiss();
+            //pd.dismiss();
+            Log.d(TAG,openWeatherMap.toString());
 
+            // Set value for our controls
             txtCity.setText(String.format("%s,%s",openWeatherMap.getCity().getName(),openWeatherMap.getCity().getCountry()));
             txtLastUpdate.setText(String.format("Last Updated: %s", Common.getDateNow()));
-            txtDescription.setText(String.format("%s", openWeatherMap.getInstantsList().get(0).getWeatherList().get(0).getDescription()));
+            Log.d(TAG,openWeatherMap.getInstantsList().toString());
+            txtDescription.setText(String.format("%s", openWeatherMap.getInstantsList().get(0).getWeatherList().getDescription()));
             txtHumidity.setText(String.format("%d%%",openWeatherMap.getInstantsList().get(0).getMain().getHumidity()));
             txtCelsius.setText(String.format("%.2f °C",openWeatherMap.getInstantsList().get(0).getMain().getTemp()));
             Picasso.with(MainActivity.this)
-                    .load(Common.getImage(openWeatherMap.getInstantsList().get(0).getWeatherList().get(0).getIcon()))
+                    .load(Common.getImage(openWeatherMap.getInstantsList().get(0).getWeatherList().getIcon()))
                     .into(imageView);
         }
     }
