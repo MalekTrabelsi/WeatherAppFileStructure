@@ -1,31 +1,34 @@
 package com.trabelsi.malek.weatherappfilestructure.Model;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by Spaceclaim on 28/11/2017.
  */
 
 public class Coord {
-    private double lat;
-    private double lon;
+    @SerializedName("lat")
+    @Expose
+    private Double lat;
 
-    public Coord(double lat, double lon) {
-        this.lat = lat;
-        this.lon = lon;
-    }
+    @SerializedName("lon")
+    @Expose
+    private Double lon;
 
-    public double getLat() {
+    public Double getLat() {
         return lat;
     }
 
-    public void setLat(double lat) {
+    public void setLat(Double lat) {
         this.lat = lat;
     }
 
-    public double getLon() {
+    public Double getLon() {
         return lon;
     }
 
-    public void setLon(double lon) {
+    public void setLon(Double lon) {
         this.lon = lon;
     }
 }

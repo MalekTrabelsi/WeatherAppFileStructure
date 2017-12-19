@@ -1,36 +1,40 @@
 package com.trabelsi.malek.weatherappfilestructure.Model;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by Spaceclaim on 28/11/2017.
  */
 
 public class City {
-    private int id;
-    private Coord coord;
+    @SerializedName("id")
+    @Expose
+    private Integer id;
+
+    @SerializedName("name")
+    @Expose
     private String name;
+
+    @SerializedName ("coord")
+    @Expose
+    private Coord coord;
+
+    @SerializedName("Country")
+    @Expose
     private String country;
 
-    public City(int id, Coord coord, String name, String country) {
-        this.id = id;
-        this.coord = coord;
-        this.name = name;
-        this.country = country;
-    }
+    @SerializedName("population")
+    @Expose
+    private Integer population;
 
-    public int getId() {
+
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId (Integer id) {
         this.id = id;
-    }
-
-    public Coord getCoord() {
-        return coord;
-    }
-
-    public void setCoord(Coord coord) {
-        this.coord = coord;
     }
 
     public String getName() {
@@ -41,11 +45,27 @@ public class City {
         this.name = name;
     }
 
+    public Coord getCoord() {
+        return coord;
+    }
+
+    public void setCoord(Coord coord) {
+        this.coord = coord;
+    }
+
     public String getCountry() {
         return country;
     }
 
     public void setCountry(String country) {
         this.country = country;
+    }
+
+    public Integer getPopulation() {
+        return population;
+    }
+
+    public void setPopulation(Integer population) {
+        this.population = population;
     }
 }
